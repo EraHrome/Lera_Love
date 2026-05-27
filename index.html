@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f0e1a">
+  <title>Для тебя ✦</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Nunito:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f0e1a;
+      --bg-card: rgba(255, 255, 255, 0.04);
+      --text: #f5f0eb;
+      --text-soft: rgba(245, 240, 235, 0.72);
+      --gold: #e8c9a0;
+      --rose: #d4a5b5;
+      --teal: #7eb8b0;
+      --glow: rgba(232, 201, 160, 0.35);
+      --radius: 20px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      font-family: 'Nunito', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(232, 201, 160, 0.12), transparent),
+        radial-gradient(ellipse 60% 40% at 100% 80%, rgba(212, 165, 181, 0.08), transparent),
+        radial-gradient(ellipse 50% 30% at 0% 60%, rgba(126, 184, 176, 0.06), transparent);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .sparkle {
+      position: fixed;
+      width: 3px;
+      height: 3px;
+      background: var(--gold);
+      border-radius: 50%;
+      opacity: 0;
+      animation: twinkle 4s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0; transform: scale(0.5); }
+      50% { opacity: 0.7; transform: scale(1); }
+    }
+
+    /* ——— Экран пароля ——— */
+    #lock {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: var(--bg);
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
+
+    #lock.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .lock-card {
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+      animation: fadeUp 0.8s ease;
+    }
+
+    .lock-heart {
+      font-size: 2.5rem;
+      margin-bottom: 12px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
+    .lock-card h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.6rem, 5vw, 2rem);
+      font-weight: 400;
+      margin-bottom: 8px;
+      color: var(--gold);
+    }
+
+    .lock-card p {
+      font-size: 0.9rem;
+      color: var(--text-soft);
+      margin-bottom: 28px;
+    }
+
+    .lock-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .lock-form input {
+      width: 100%;
+      padding: 14px 18px;
+      border: 1px solid rgba(232, 201, 160, 0.25);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 1rem;
+      text-align: center;
+      letter-spacing: 0.05em;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .lock-form input::placeholder {
+      color: rgba(245, 240, 235, 0.35);
+      letter-spacing: 0;
+    }
+
+    .lock-form input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px var(--glow);
+    }
+
+    .lock-form button {
+      padding: 14px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #c9a87c, #e8c9a0);
+      color: #1a1520;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s, opacity 0.15s;
+    }
+
+    .lock-form button:active { transform: scale(0.97); }
+
+    .lock-error {
+      min-height: 1.2em;
+      font-size: 0.85rem;
+      color: var(--rose);
+      margin-top: 4px;
+    }
+
+    /* ——— Основной контент ——— */
+    #main {
+      position: relative;
+      z-index: 2;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.8s ease 0.2s;
+    }
+
+    #main.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .wrap {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 32px 20px calc(48px + var(--safe-bottom));
+    }
+
+    header.hero {
+      text-align: center;
+      margin-bottom: 40px;
+      animation: fadeUp 0.9s ease;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 16px;
+      opacity: 0.85;
+    }
+
+    .hero h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(2rem, 8vw, 2.8rem);
+      font-weight: 400;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 em {
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    .hero-lead {
+      font-size: 1rem;
+      color: var(--text-soft);
+      max-width: 340px;
+      margin: 0 auto;
+    }
+
+    /* ——— Карточки с фото ——— */
+    .gallery {
+      display: flex;
+      flex-direction: column;
+      gap: 36px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: var(--radius);
+      overflow: hidden;
+      backdrop-filter: blur(8px);
+      animation: fadeUp 0.8s ease both;
+    }
+
+    .card:nth-child(1) { animation-delay: 0.1s; }
+    .card:nth-child(2) { animation-delay: 0.25s; }
+    .card:nth-child(3) { animation-delay: 0.4s; }
+
+    .card-photo {
+      position: relative;
+      aspect-ratio: 3 / 4;
+      max-height: 70vh;
+      overflow: hidden;
+      background: #1a1825;
+    }
+
+    .card-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+    }
+
+    .card-photo::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(15, 14, 26, 0.5) 0%, transparent 40%);
+      pointer-events: none;
+    }
+
+    .card-body {
+      padding: 22px 20px 24px;
+    }
+
+    .card-tag {
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 8px;
+    }
+
+    .card:nth-child(2) .card-tag { color: var(--gold); }
+    .card:nth-child(3) .card-tag { color: var(--rose); }
+
+    .card-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.45rem;
+      font-weight: 600;
+      line-height: 1.3;
+      margin-bottom: 12px;
+    }
+
+    .card-text {
+      font-size: 0.95rem;
+      color: var(--text-soft);
+      font-weight: 300;
+    }
+
+    .card-text + .card-text {
+      margin-top: 10px;
+    }
+
+    /* ——— Футер ——— */
+    footer.closing {
+      text-align: center;
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      animation: fadeUp 0.8s ease 0.55s both;
+    }
+
+    .closing-quote {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(1.3rem, 4.5vw, 1.65rem);
+      font-style: italic;
+      line-height: 1.45;
+      color: var(--gold);
+      margin-bottom: 16px;
+      max-width: 380px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .closing-note {
+      font-size: 0.9rem;
+      color: var(--text-soft);
+    }
+
+    .closing-date {
+      margin-top: 20px;
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      color: rgba(232, 201, 160, 0.5);
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ——— Мобильная адаптация ——— */
+    @media (max-width: 380px) {
+      .wrap { padding-left: 16px; padding-right: 16px; }
+      .card-body { padding: 18px 16px 20px; }
+    }
+
+    @media (min-width: 600px) {
+      .wrap { padding-top: 48px; }
+      .gallery { gap: 44px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="sparkles" aria-hidden="true"></div>
+
+  <!-- Экран входа -->
+  <section id="lock" aria-label="Вход">
+    <div class="lock-card">
+      <div class="lock-heart" aria-hidden="true">♡</div>
+      <h1>Только для тебя</h1>
+      <p>Введи дату, которую помним только мы двое</p>
+      <form class="lock-form" id="lockForm" autocomplete="off">
+        <input
+          type="text"
+          id="passwordInput"
+          inputmode="numeric"
+          placeholder="дд.мм.гггг"
+          maxlength="12"
+          aria-label="Пароль"
+          required
+        >
+        <button type="submit">Открыть</button>
+        <p class="lock-error" id="lockError" role="alert"></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- Основная страница -->
+  <main id="main">
+    <div class="wrap">
+      <header class="hero">
+        <span class="hero-badge">с любовью</span>
+        <h1>Ты — <em>самое тёплое</em>,<br>что есть в моих днях</h1>
+        <p class="hero-lead">
+          Несколько моментов, в которых ты невероятна — и слова, которые хочется сказать вслух, но иногда проще оставить здесь.
+        </p>
+      </header>
+
+      <div class="gallery">
+
+        <!-- Фото 1: ночь, огоньки -->
+        <article class="card">
+          <div class="card-photo">
+            <img
+              src="nE-v8mETR_HCkcbZtpQzWX_xVrWGBo0bHgkZWyLI-rT6-HYq3itTAltsCUXyKjyfSRBlzPXeNpBwB7PvcFkksd3Z.jpg"
+              alt="Ты среди светящихся огоньков в тёмном платье"
+              loading="lazy"
+              decoding="async"
+            >
+          </div>
+          <div class="card-body">
+            <p class="card-tag">✦ волшебная ночь</p>
+            <h2 class="card-title">Ты светишься ярче всех огоньков вокруг</h2>
+            <p class="card-text">
+              Сотни маленьких огней за спиной — а взгляд цепляется только за тебя. Спокойная улыбка, изящный силуэт, будто ночь специально зажглась, чтобы подчеркнуть, какая ты красивая.
+            </p>
+            <p class="card-text">
+              С тобой даже темнота кажется тёплой. Ты — мой самый нежный свет.
+            </p>
+          </div>
+        </article>
+
+        <!-- Фото 2: вечер, собор -->
+        <article class="card">
+          <div class="card-photo">
+            <img
+              src="PtDvJ-SP-zBAmCD--h20bFShpxmO0j0NZm-Bs9czbFGgZ02CMrHSMT-Xh8qFG0FZsjJfEkf8OIi8ZrU5rro7MRar.jpg"
+              alt="Ты в чёрном пиджаке на фоне подсвеченного здания"
+              loading="lazy"
+              decoding="async"
+            >
+          </div>
+          <div class="card-body">
+            <p class="card-tag">♡ тёплый вечер</p>
+            <h2 class="card-title">Изящная, как этот закатный свет на стенах</h2>
+            <p class="card-text">
+              Золотой свет на камне, мягкая укладка, добрые глаза — ты выглядишь так, будто весь вечер создан для тебя. Уверенная, нежная, невероятно женственная.
+            </p>
+            <p class="card-text">
+              Рядом с тобой обычная прогулка превращается в кадр, который хочется хранить. Ты делаешь мир красивее просто тем, что в нём есть.
+            </p>
+          </div>
+        </article>
+
+        <!-- Фото 3: день, город -->
+        <article class="card">
+          <div class="card-photo">
+            <img
+              src="HjsGZBQcMJZqL_kmG67t3eXI7aHA8oN9zZMuwfCCOPgYrHA_iT3srtzYDFh3yRbbiyKBBzbM7zKn3iAN6zzufDvQ.jpg"
+              alt="Ты на пешеходном переходе в дневном городе"
+              loading="lazy"
+              decoding="async"
+            >
+          </div>
+          <div class="card-body">
+            <p class="card-tag">☼ светлый день</p>
+            <h2 class="card-title">Ты делаешь обычный день особенным</h2>
+            <p class="card-text">
+              Мягкий дневной свет, спокойная улыбка, безупречный вкус — ты умеешь быть одновременно непринуждённой и невероятно элегантной. В глазах — та самая доброта, ради которой хочется останавливаться и смотреть.
+            </p>
+            <p class="card-text">
+              Город шумит вокруг, а мне достаточно только тебя. Ты — моё самое любимое «здесь и сейчас».
+            </p>
+          </div>
+        </article>
+
+      </div>
+
+      <footer class="closing">
+        <p class="closing-quote">
+          «Ты не обязана быть идеальной — ты уже достаточно прекрасна. Я рядом, я горжусь тобой, я восхищаюсь тобой каждый день.»
+        </p>
+        <p class="closing-note">
+          Если станет трудно — вспомни: ты важна, ты любима, ты не одна. ♡
+        </p>
+        <p class="closing-date">23 · 05 · 2026</p>
+      </footer>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      'use strict';
+
+      var PASSWORD = '23052026';
+      var STORAGE_KEY = 'for_you_unlocked';
+
+      var lock = document.getElementById('lock');
+      var main = document.getElementById('main');
+      var form = document.getElementById('lockForm');
+      var input = document.getElementById('passwordInput');
+      var errorEl = document.getElementById('lockError');
+      var sparklesRoot = document.getElementById('sparkles');
+
+      function normalize(value) {
+        return String(value).replace(/\D/g, '');
+      }
+
+      function unlock() {
+        try { sessionStorage.setItem(STORAGE_KEY, '1'); } catch (e) {}
+        lock.classList.add('hidden');
+        main.classList.add('visible');
+        createSparkles();
+      }
+
+      function checkPassword(raw) {
+        return normalize(raw) === PASSWORD;
+      }
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        errorEl.textContent = '';
+        if (checkPassword(input.value)) {
+          unlock();
+        } else {
+          errorEl.textContent = 'Не та дата — попробуй ещё раз ♡';
+          input.focus();
+          input.select();
+        }
+      });
+
+      if (sessionStorage.getItem(STORAGE_KEY) === '1') {
+        unlock();
+      }
+
+      function createSparkles() {
+        if (sparklesRoot.childElementCount > 0) return;
+        for (var i = 0; i < 18; i++) {
+          var s = document.createElement('span');
+          s.className = 'sparkle';
+          s.style.left = Math.random() * 100 + '%';
+          s.style.top = Math.random() * 100 + '%';
+          s.style.animationDelay = (Math.random() * 4) + 's';
+          s.style.animationDuration = (3 + Math.random() * 3) + 's';
+          sparklesRoot.appendChild(s);
+        }
+      }
+    })();
+  </script>
+</body>
+</html>
