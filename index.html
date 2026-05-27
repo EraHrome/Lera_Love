@@ -385,8 +385,9 @@
           id="passwordInput"
           inputmode="numeric"
           placeholder="дд.мм.гггг"
-          maxlength="12"
+          maxlength="10"
           aria-label="Пароль"
+          autocomplete="off"
           required
         >
         <button type="submit">Открыть</button>
@@ -505,6 +506,46 @@
       function normalize(value) {
         return String(value).replace(/\D/g, '');
       }
+
+      function formatDateDigits(digits) {
+        digits = digits.slice(0, 8);
+        if (!digits.length) return '';
+        var d = digits.slice(0, 2);
+        var m = digits.slice(2, 4);
+        var y = digits.slice(4, 8);
+        if (digits.length <= 2) return d;
+        if (digits.length <= 4) return d + '.' + m;
+        return d + '.' + m + '.' + y;
+      }
+
+      function applyDateMask(el) {
+        var pos = el.selectionStart || 0;
+        var digitsBefore = normalize(el.value.slice(0, pos)).length;
+        var digits = normalize(el.value).slice(0, 8);
+        var formatted = formatDateDigits(digits);
+        el.value = formatted;
+
+        var newPos = 0;
+        var seen = 0;
+        for (var i = 0; i < formatted.length; i++) {
+          if (/\d/.test(formatted.charAt(i))) seen++;
+          newPos = i + 1;
+          if (seen >= digitsBefore) break;
+        }
+        if (digitsBefore === 0) newPos = 0;
+        try { el.setSelectionRange(newPos, newPos); } catch (e) {}
+      }
+
+      input.addEventListener('input', function () {
+        applyDateMask(input);
+      });
+
+      input.addEventListener('paste', function (e) {
+        e.preventDefault();
+        var pasted = (e.clipboardData || window.clipboardData).getData('text');
+        input.value = formatDateDigits(normalize(pasted));
+        try { input.setSelectionRange(input.value.length, input.value.length); } catch (err) {}
+      });
 
       function unlock() {
         try { sessionStorage.setItem(STORAGE_KEY, '1'); } catch (e) {}
